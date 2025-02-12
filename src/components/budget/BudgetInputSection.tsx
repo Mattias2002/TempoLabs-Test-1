@@ -17,6 +17,15 @@ interface BudgetCategory {
 interface BudgetInputSectionProps {
   categories?: BudgetCategory[];
   onUpdateCategory?: (categoryId: string, entries: any[]) => void;
+  entries?: Record<
+    string,
+    Array<{
+      id: string;
+      date: string;
+      description: string;
+      amount: number;
+    }>
+  >;
 }
 
 const defaultCategories: BudgetCategory[] = [
@@ -85,6 +94,7 @@ const defaultCategories: BudgetCategory[] = [
 const BudgetInputSection: React.FC<BudgetInputSectionProps> = ({
   categories = defaultCategories,
   onUpdateCategory = () => {},
+  entries = {},
 }) => {
   return (
     <Card className="p-6 bg-white w-full">
@@ -100,16 +110,18 @@ const BudgetInputSection: React.FC<BudgetInputSectionProps> = ({
         {categories.map((category) => (
           <TabsContent key={category.id} value={category.id}>
             <DataGrid
-              entries={category.entries}
+              entries={entries[category.id] || category.entries}
               onAddEntry={(entry) => {
+                const currentEntries = entries[category.id] || [];
                 const newEntries = [
-                  ...category.entries,
+                  ...currentEntries,
                   { ...entry, id: Math.random().toString() },
                 ];
                 onUpdateCategory(category.id, newEntries);
               }}
               onDeleteEntry={(entryId) => {
-                const newEntries = category.entries.filter(
+                const currentEntries = entries[category.id] || [];
+                const newEntries = currentEntries.filter(
                   (e) => e.id !== entryId,
                 );
                 onUpdateCategory(category.id, newEntries);
